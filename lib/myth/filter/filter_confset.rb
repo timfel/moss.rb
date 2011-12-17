@@ -2,14 +2,17 @@
 
 #Configure set to use.
 #A configure set is a keywords set+comment type specific to the frontend ( Java,Ruby,VHDL)
+#Text can be of two types 'Essay' or 'Code'
+#Essay --> any usual text assignment
+#Code  --> any source code or software assignment
 #If a '.conf' file with invalid syntax is specified, the code may break. Some checks needed.
 
 module Myth
   module Filter
     
-    class Confset
+    class FilterConfset
 
-      attr_accessor :words_list, :single_line, :multi_line
+      attr_accessor :words_list, :single_line, :multi_line,
 
       #Get a configuration file
       def initialize(confileinstance)
@@ -36,6 +39,9 @@ module Myth
           
           #Remove trailing newlines
           line.chomp!
+
+          #Check if Essay or Code type else popultate other fileds needed for code type
+          break if line=="Essay:"                     
 
           #Skip the line which says 'Keywords:'
           next if line=='Keywords:'

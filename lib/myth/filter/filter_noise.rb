@@ -4,20 +4,18 @@
 #Remove whitespace, capatilization , punctuations and identifiers
 #Also keywords are something which are always the same,so need to be filtered out
 
-require_relative './confset.rb' #Relative require works only for ruby1.9.x
+require_relative './filter_confset.rb' #Relative require works only for ruby1.9.x
 
 module Myth
   module Filter
 
     class NoiseFilter
-
-      attr_accessor :filtered_text
       
       #Invoke the Filter on the file with a confset for different frontend languages
       def initialize(text_to_process,confinstance)       
 
         #Some duck typing to do :)
-        return unless confinstance.instance_of?(Myth::Filter::Confset)
+        return unless confinstance.instance_of?(Myth::Filter::FilterConfset)
         return unless text_to_process.instance_of?(String)
         
         @text_to_process=text_to_process
@@ -28,6 +26,19 @@ module Myth
       end
 
       private
+
+      #For successive filter processes to sucessfull, make @text_to_process a copy of   the filtered text from the first phase
+      #The use of the function will be apparent...be patient :)
+      def switch_text       
+        @text_to_process=@filtered_text
+        @filtered_text=""
+      end
+
+       #We also want to replace every identifier with 'V' (identifier names hardly matter)
+      #Regex ninja skills in place :)
+      def replace_identifiers       
+
+      end
 
       #If a single line comment then we need to ignore this particular line
       #If a multigline comment begins then we need to ignore the lines till we find the end 
@@ -115,39 +126,81 @@ module Myth
           
         end
 
+        switch_text
       end
       
+      #Strip off the keywords, chances are they will be repeated all over. Which is quite obvious and points to no plagiarism
+      #However no mention about the keywords in
       def remove_keywords
         
-      end
+        line_array=@text_to_process.split("\n")
+
+        for line in line_array do          
+          for keyword in @confinstance.words_list do
+            
+            #Till we have single/multiple offcurences of keyword somewhere in the line
+            while line.include?(keyword) do             
+              line.sub!(keyword,"")              
+            end
+          end
+          
+          @filtered_text << line+"\n"
+        end
       
-      def remove_whitespace
-        #This is one of the easiest part ;)
+        switch_text
+      end
+
+      #Remove common punctuations which give no insights on the matter(semantic content) of the text
+      def remove_punctuations
         
       end
-      
-      #We also want to replace every identifier with 'V' (identifier names hardly matter)
-      #Regex ninja skills in place :)
-      def replace_identifiers       
 
+      def remove_whitespaces
+              
+        line_array=@text_to_process.split("\n")   
+
+        print line_array[30]
+               
+        for line in line_array do 
+          
+          #Remove \r and \n
+          line.chomp!
+          
+          #Remove all tabs
+          while line.include?("\t") do
+            line.sub!("\t","") 
+          end
+
+          #Remove all whitespaces
+          while line.include?(" ") do             
+            line.sub!(" ","")              
+          end 
+          
+          print line
+          
+          @filtered_text << line   
+        end
       end
       
       public
       
       #Calling a series of private methods to filter out the noise
-      def filter
+      def get_filtered_text
+       
+        replace_identifiers
         
         remove_comments
         
         remove_keywords
         
-        replace_identifiers
-
-        remove_whitespace
+        remove_punctuations
         
+        remove_whitespaces                    
+
+        #finally return the filtered text 
+        return @filtered_text
       end
-
+      
     end
-
   end
 end

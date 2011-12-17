@@ -31,8 +31,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class Code extends RemoteServiceServlet implements ListService
 {
 	private List<TweeterList> listoflist=new ArrayList<TweeterList>();
-	private DatastoreService datastore =
-        DatastoreServiceFactory.getDatastoreService();
+	private DatastoreService datastore =DatastoreServiceFactory.getDatastoreService();
 
 	@Override
 	public List<TweeterList> getList()

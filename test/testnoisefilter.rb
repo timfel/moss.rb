@@ -5,7 +5,7 @@
 
 require 'test/unit'
 require '../lib/myth/filter/filter_noise.rb'
-require '../lib/myth/filter/confset.rb'
+require '../lib/myth/filter/filter_confset.rb'
 
 class TestNoiseFilter < Test::Unit::TestCase
 
@@ -13,7 +13,7 @@ class TestNoiseFilter < Test::Unit::TestCase
 
     fp=File.open('../conf/java.conf')
 
-    confinstance=Myth::Filter::Confset.new(fp)
+    confinstance=Myth::Filter::FilterConfset.new(fp)
 
     text_contents=File.read('./Code.java')
 
@@ -22,7 +22,7 @@ class TestNoiseFilter < Test::Unit::TestCase
     
     #Write the text after filtering
     File.open('dump.txt','w') { |fp| fp.puts(instance.filtered_text) }
-
+    
   end
 
 end
