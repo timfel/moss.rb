@@ -34,10 +34,23 @@ module Myth
         @filtered_text=""
       end
 
+
+      def lower_case
+        
+        line_array=@text_to_process.split("\n")
+        
+        for line in line_array do
+          line.downcase!
+          @filtered_text << line << "\n"
+        end
+        
+        switch_text        
+      end
+
        #We also want to replace every identifier with 'V' (identifier names hardly matter)
       #Regex ninja skills in place :)
       def replace_identifiers       
-
+        
       end
 
       #If a single line comment then we need to ignore this particular line
@@ -153,31 +166,62 @@ module Myth
       #Remove common punctuations which give no insights on the matter(semantic content) of the text
       def remove_punctuations
         
+        line_array=@text_to_process.split("\n")
+
+        for line in line_array do
+          
+          #Remove 'commas' and semicolon
+          while ( line.include?(",") || line.include?(";") || line.include?(".")) do
+            line.sub!(",","")
+            line.sub!(";","")
+            line.sub!(".","")
+          end
+
+          #Remove single and double quotes
+          while( line.include?("'") || line.include?('"') ) do
+            line.sub!("'","")
+            line.sub!('"',"")
+          end
+
+          #Remove all sorts of braces
+          while( line.include?("(") || line.include?(")") || line.include?("[") || line.include?("]") || line.include?("{") || line.include?("}") || line.include?("<") ||line.include?(">"))
+            line.sub!("(","")
+            line.sub!(")","")
+            line.sub!("{","")
+            line.sub!("}","")
+            line.sub!("[","")
+            line.sub!("]","")
+            line.sub!("<","")
+            line.sub!(">","")
+          end
+
+          #Remove @
+          while line.include?("@")           
+            line.sub!("@","")
+          end
+
+          @filtered_text << line           
+        end
+        
+        switch_text
+
       end
 
       def remove_whitespaces
               
-        line_array=@text_to_process.split("\n")   
-
-        print line_array[30]
+        line_array=@text_to_process.split("\n")           
                
-        for line in line_array do 
+        for line in line_array do           
           
           #Remove \r and \n
           line.chomp!
           
-          #Remove all tabs
-          while line.include?("\t") do
+          #Remove all tabs and whitespaces
+          while ( line.include?("\t") || line.include?(" ")) do
             line.sub!("\t","") 
+            line.sub!(" ","")
           end
 
-          #Remove all whitespaces
-          while line.include?(" ") do             
-            line.sub!(" ","")              
-          end 
-          
-          print line
-          
           @filtered_text << line   
         end
       end
@@ -186,7 +230,9 @@ module Myth
       
       #Calling a series of private methods to filter out the noise
       def get_filtered_text
-       
+
+        lower_case
+
         replace_identifiers
         
         remove_comments

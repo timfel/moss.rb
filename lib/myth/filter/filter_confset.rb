@@ -12,7 +12,7 @@ module Myth
     
     class FilterConfset
 
-      attr_accessor :words_list, :single_line, :multi_line,
+      attr_accessor :words_list, :single_line, :multi_line
 
       #Get a configuration file
       def initialize(confileinstance)
@@ -35,7 +35,7 @@ module Myth
         in_multi_comment_section=false
 
         #Reading the file line by line
-        confileinstance.each do |line| 
+        confileinstance.each do |line|
           
           #Remove trailing newlines
           line.chomp!
@@ -69,14 +69,12 @@ module Myth
             comment_starter=line.split
             @multi_line[comment_starter[0]]=[comment_starter[1]]
           end
-
         end
-
+        
         confileinstance.close
         
       end
-
-    end
-    
+      
+    end    
   end
 end

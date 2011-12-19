@@ -18,10 +18,10 @@ class TestNoiseFilter < Test::Unit::TestCase
     text_contents=File.read('./Code.java')
 
     instance=Myth::Filter::NoiseFilter.new(text_contents,confinstance)
-    instance.filter
+    ans=instance.get_filtered_text
     
     #Write the text after filtering
-    File.open('dump.txt','w') { |fp| fp.puts(instance.filtered_text) }
+    File.open('dump.txt','w') { |fp| fp.puts(ans) }
     
   end
 
