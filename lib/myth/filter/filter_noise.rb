@@ -38,7 +38,6 @@ module Myth
       def lower_case
         
         line_array=@text_to_process.split("\n")
-        
         for line in line_array do
           line.downcase!
           @filtered_text << line << "\n"
@@ -47,10 +46,38 @@ module Myth
         switch_text        
       end
 
-       #We also want to replace every identifier with 'V' (identifier names hardly matter)
+      #We also want to replace every identifier with 'v' (identifier names hardly matter)
       #Regex ninja skills in place :)
+      #Also we would skip any import lines
       def replace_identifiers       
+        line_array=@text_to_process.split("\n")
+
+        for line in line_array do
+          
+          #Remove any leading whitespaces
+          line.lstrip!
+          
+          #Make a list of words for the line
+          split_line=line.split(" ")   
+
+          temp_line=line.clone         
+          
+          #If the first word of line does not begin with any of @no_indentifier specified by confile, we can change all the words that are "indentifier" by regex to 'v'
         
+          unless @confinstance.no_identifiers.include?(split_line[0])               
+            #for all occurences                                 
+            line.scan(/[[:alpha:]]+\w*/) do |word|                
+              #unless the keyword list contains this word             
+              unless @confinstance.words_list.include?(word)                
+                temp_line.sub!(word,"v")
+              end
+            end
+          end
+          
+          @filtered_text << temp_line << "\n"          
+        end
+        
+        #switch_text
       end
 
       #If a single line comment then we need to ignore this particular line
@@ -151,10 +178,9 @@ module Myth
         for line in line_array do          
           for keyword in @confinstance.words_list do
             
-            #Till we have single/multiple offcurences of keyword somewhere in the line
-            while line.include?(keyword) do             
-              line.sub!(keyword,"")              
-            end
+            #Remove multiple occurences of keyword in line                      
+            line.gsub!(keyword,"")             
+            
           end
           
           @filtered_text << line+"\n"
@@ -170,35 +196,29 @@ module Myth
 
         for line in line_array do
           
-          #Remove 'commas' and semicolon
-          while ( line.include?(",") || line.include?(";") || line.include?(".")) do
-            line.sub!(",","")
-            line.sub!(";","")
-            line.sub!(".","")
-          end
+          #Remove 'commas' and semicolon          
+          line.gsub!(",","")
+          line.gsub!(";","")
+          line.gsub!(".","")         
 
           #Remove single and double quotes
-          while( line.include?("'") || line.include?('"') ) do
-            line.sub!("'","")
-            line.sub!('"',"")
-          end
+          line.gsub!("'","")
+          line.gsub!('"',"")
+        
 
           #Remove all sorts of braces
-          while( line.include?("(") || line.include?(")") || line.include?("[") || line.include?("]") || line.include?("{") || line.include?("}") || line.include?("<") ||line.include?(">"))
-            line.sub!("(","")
-            line.sub!(")","")
-            line.sub!("{","")
-            line.sub!("}","")
-            line.sub!("[","")
-            line.sub!("]","")
-            line.sub!("<","")
-            line.sub!(">","")
-          end
+          line.gsub!("(","")
+          line.gsub!(")","")
+          line.gsub!("{","")
+          line.gsub!("}","")
+          line.gsub!("[","")
+          line.gsub!("]","")
+          line.gsub!("<","")
+          line.gsub!(">","")
+         
 
-          #Remove @
-          while line.include?("@")           
-            line.sub!("@","")
-          end
+          #Remove @                     
+          line.gsub!("@","")          
 
           @filtered_text << line           
         end
@@ -216,11 +236,9 @@ module Myth
           #Remove \r and \n
           line.chomp!
           
-          #Remove all tabs and whitespaces
-          while ( line.include?("\t") || line.include?(" ")) do
-            line.sub!("\t","") 
-            line.sub!(" ","")
-          end
+          #Remove all tabs and whitespaces        
+          line.gsub!("\t","") 
+          line.gsub!(" ","")         
 
           @filtered_text << line   
         end
@@ -232,16 +250,16 @@ module Myth
       def get_filtered_text
 
         lower_case
-
-        replace_identifiers
         
         remove_comments
         
-        remove_keywords
+        replace_identifiers 
         
-        remove_punctuations
+       # remove_keywords
         
-        remove_whitespaces                    
+       # remove_punctuations      
+        
+       # remove_whitespaces                    
 
         #finally return the filtered text 
         return @filtered_text

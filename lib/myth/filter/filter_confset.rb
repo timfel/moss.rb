@@ -12,7 +12,7 @@ module Myth
     
     class FilterConfset
 
-      attr_accessor :words_list, :single_line, :multi_line
+      attr_accessor :words_list, :single_line, :multi_line, :no_identifiers
 
       #Get a configuration file
       def initialize(confileinstance)
@@ -45,6 +45,11 @@ module Myth
 
           #Skip the line which says 'Keywords:'
           next if line=='Keywords:'
+
+          line_split=line.split(" ")
+          if line_split[0]=="NoIdentifier:"
+            @no_identifiers=line_split[1...line_split.length]
+          end
 
           #Once we encounter the line 'Comments:' we know we are in comments block
           if line=='Comments:'
