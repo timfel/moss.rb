@@ -36,6 +36,7 @@ public class Code extends RemoteServiceServlet implements ListService
 	@Override
 	public List<TweeterList> getList()
 	{
+	    String str="hello"
 
 			//Try to Clear of the List to prevent refresh mess( maybe it helps)
 			listoflist.clear();

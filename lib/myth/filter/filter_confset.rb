@@ -48,6 +48,7 @@ module Myth
 
           line_split=line.split(" ")
           if line_split[0]=="NoIdentifier:"
+            in_comment_section=true
             @no_identifiers=line_split[1...line_split.length]
           end
 

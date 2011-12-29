@@ -48,8 +48,10 @@ module Myth
 
       #We also want to replace every identifier with 'v' (identifier names hardly matter)
       #Regex ninja skills in place :)
-      #Also we would skip any import lines
-      def replace_identifiers       
+      #Also we would skip entire import lines
+      #Also skip function calls
+      def replace_identifiers      
+        #Get a list of line from text String
         line_array=@text_to_process.split("\n")
 
         for line in line_array do
@@ -58,26 +60,39 @@ module Myth
           line.lstrip!
           
           #Make a list of words for the line
-          split_line=line.split(" ")   
+          split_line=line.split(" ")       
 
-          temp_line=line.clone         
+          new_line=""
+          text_modified=false
           
           #If the first word of line does not begin with any of @no_indentifier specified by confile, we can change all the words that are "indentifier" by regex to 'v'
         
-          unless @confinstance.no_identifiers.include?(split_line[0])               
-            #for all occurences                                 
-            line.scan(/[[:alpha:]]+\w*/) do |word|                
-              #unless the keyword list contains this word             
-              unless @confinstance.words_list.include?(word)                
-                temp_line.sub!(word,"v")
+          unless @confinstance.no_identifiers.include?(split_line[0])  
+            text_modified=true
+            for word in split_line
+              #First regex for a word which begins with a-z or _ and then has any word(w) and then does not end with )
+              #We did not consider A-Z coz we have already lowercased our text
+              #Second regex for just a single length word indentifier
+              if word.match(/^[a-z|_]\w*[^\)]$/)!=nil || word.match(/^[a-z]$/)!=nil
+                #puts word
+                #unless the keyword list contains this word                       
+                unless @confinstance.words_list.include?(word)   
+                  word.sub!(word,"v")
+                end                
               end
+              new_line << " " << word << " "
             end
           end
           
-          @filtered_text << temp_line << "\n"          
+          if text_modified==true
+            @filtered_text << new_line << "\n"          
+          else
+            @filtered_text << line << "\n" 
+          end
+          
         end
         
-        #switch_text
+        switch_text
       end
 
       #If a single line comment then we need to ignore this particular line
@@ -181,50 +196,99 @@ module Myth
             #Remove multiple occurences of keyword in line                      
             line.gsub!(keyword,"")             
             
-          end
+          end         
           
           @filtered_text << line+"\n"
-        end
-      
+        end        
         switch_text
       end
 
-      #Remove common punctuations which give no insights on the matter(semantic content) of the text
-      def remove_punctuations
+      #Space all words and symbols which give an insights on different tokens in our code for later phases
+      def space_tokens
         
         line_array=@text_to_process.split("\n")
 
         for line in line_array do
+
+          #There is a pattern we need to observe
+          # A line of code like this-->
+          # for(c=1;c<1-;c++)
+          # We need to sepearte for and (
+          # However, for a code like this-->
+          # getStuff(), getstuff and ( need to be together so as we can identify it as  a method
+          # We cannot strip comments before identifiers as well because we will lose the info on which lines are package imports/library includes or declaration line
+          #Hence our keywords need some special treatment
+          line_split=line.split(" ")   
+          line=""
           
-          #Remove 'commas' and semicolon          
-          line.gsub!(",","")
-          line.gsub!(";","")
-          line.gsub!(".","")         
+          for word in line_split           
+            for keyword in @confinstance.words_list do                  
+              if word.include?(keyword)
+                new_keyword=" " << keyword << " "
+                word.sub!(keyword,new_keyword)
+              end
+            end  
+            line << word
+          end   
+          
+          #Space'commas' and semicolon          
+          line.gsub!(","," , ")
+          line.gsub!(";"," ; ")               
+      
 
-          #Remove single and double quotes
-          line.gsub!("'","")
-          line.gsub!('"',"")
+          line.gsub!("{"," { ")
+          line.gsub!("}"," } ")
+          line.gsub!("["," [ ")
+          line.gsub!("]"," ] ")
+         
+          #For all words with =,:,<,> sticked together we can seperate the identifier.methodname() or identifier:list with a space so as they can be later properly identified as a sepearte varibale
+          #We need them at this stage to differentiate between different tokens, so they will be removed in a later stage
+          line.gsub!("="," = ")
+          line.gsub!(":"," : ")
+          line.gsub!("<"," < ")
+          line.gsub!(">"," > ")
+          line.gsub!(".",". ")         
+          
+
+          #Remove @                     
+          line.gsub!("@","")                             
+
+          @filtered_text << line+"\n"         
+        end
+
+        switch_text
+
+      end
+
+      #Get rid of all now useless symbols
+      def remove_punctuations       
         
+        line_array=@text_to_process.split("\n")
+        
+        for line in line_array do
+                   
+          line.gsub!(",","")
+          line.gsub!(";","")               
+      
 
-          #Remove all sorts of braces
-          line.gsub!("(","")
-          line.gsub!(")","")
           line.gsub!("{","")
           line.gsub!("}","")
           line.gsub!("[","")
           line.gsub!("]","")
+          line.gsub!(")","")
+          line.gsub!("(","")
+         
+          line.gsub!("=","")
+          line.gsub!(":","")
           line.gsub!("<","")
           line.gsub!(">","")
-         
+          line.gsub!(".","")  
+          line.gsub!("\"","")         
 
-          #Remove @                     
-          line.gsub!("@","")          
-
-          @filtered_text << line           
+          @filtered_text << line+"\n"
         end
         
         switch_text
-
       end
 
       def remove_whitespaces
@@ -252,14 +316,17 @@ module Myth
         lower_case
         
         remove_comments
+
+        space_tokens
         
-        replace_identifiers 
+        replace_identifiers           
         
-       # remove_keywords
+        #Remove keyword after identifiers because we do not remove identifiers from certain lines with Keywords like 'import' or 'package'
+        remove_keywords 
+
+        remove_punctuations                          
         
-       # remove_punctuations      
-        
-       # remove_whitespaces                    
+        remove_whitespaces    
 
         #finally return the filtered text 
         return @filtered_text
