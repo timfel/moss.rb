@@ -1,0 +1,1 @@
+vgetmaximumvvv=0v=0v<vvv++vv==10v++v=vv-vv=0v=0v<vvv++vv==10vv++=vvv=vv102v+2v=0v<vvv++v=0v<vvvv++vfillvvv-1dfs00v+vvvdfsvvvv==vv0perfectluckvvvvvv=dfsv+10v+1v==00vvvv!=-1vvvvv=0cancutvvv=vmaxvdfsvv+1v-1+1v=vmaxvdfsv+10vvvvv=vcancutvvvv-here*10>10perfectluckvvvv-here*10==10

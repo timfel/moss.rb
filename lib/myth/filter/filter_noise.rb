@@ -73,7 +73,7 @@ module Myth
               #First regex for a word which begins with a-z or _ and then has any word(w) and then does not end with )
               #We did not consider A-Z coz we have already lowercased our text
               #Second regex for just a single length word indentifier
-              if word.match(/^[a-z|_]\w*[^\)]$/)!=nil || word.match(/^[a-z]$/)!=nil
+              if word.match(/^[a-z|_]\w*[^\(]$/)!=nil || word.match(/^[a-z]$/)!=nil
                 #puts word
                 #unless the keyword list contains this word                       
                 unless @confinstance.words_list.include?(word)   
@@ -240,6 +240,10 @@ module Myth
           line.gsub!("}"," } ")
           line.gsub!("["," [ ")
           line.gsub!("]"," ] ")
+          line.gsub!("(","( ")  #keep attached to method but seperate from parameter within
+          line.gsub!(")"," ) ")
+          line.gsub!("+"," + ") #Case when c++ c + +
+          line.gsub!("-"," - ")
          
           #For all words with =,:,<,> sticked together we can seperate the identifier.methodname() or identifier:list with a space so as they can be later properly identified as a sepearte varibale
           #We need them at this stage to differentiate between different tokens, so they will be removed in a later stage
@@ -278,10 +282,7 @@ module Myth
           line.gsub!(")","")
           line.gsub!("(","")
          
-          line.gsub!("=","")
           line.gsub!(":","")
-          line.gsub!("<","")
-          line.gsub!(">","")
           line.gsub!(".","")  
           line.gsub!("\"","")         
 
