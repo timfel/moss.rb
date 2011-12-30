@@ -37,7 +37,7 @@ module Myth
       for c in 0..loop do        
         puts text_hash
         text_hash=(radix*(text_hash-text_to_process[c].ord*highorder)+(text_hash[c+k].ord))%q
-        text_hash_string<< text_hash_string << " "
+        text_hash_string << text_hash_string << " "
       end
     end
   
