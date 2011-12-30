@@ -12,7 +12,8 @@ class TextHasher < Test::Unit::TestCase
   def test_hasher
     text=File.read('./dump.txt')   
     
-    puts calc_hash(text,5)
+    puts text
+    puts calc_hash(text,5,101)
   end
 
 end

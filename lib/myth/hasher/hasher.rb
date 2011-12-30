@@ -10,34 +10,36 @@ module Myth
     Struct.new('Hash',:value,:line_number)
     
     #For hashing a piece of text we ned two sets of parameters
-    #k-->k grams hashes    
-    def calc_hash(text_to_process,k)
+    #k-->For buildinf units of k grams hashes  
+    #q-->Prime which lets calculations stay within range
+    def calc_hash(text_to_process,k,q)
       
       text_length=text_to_process.length
       radix=26
       
-      highorder=(radix**(text_length-1))
+      highorder=(radix**(text_length-1))%q
       
       #Individual hashes for k-grams
       text_hash=0
       
-      #the entire k-grams hashes list for the document
+      #The entire k-grams hashes list for the document
       text_hash_string=""
 
       #Preprocessing
-      for c in 0..k do
+      for c in 0...k do
         text_hash=(radix*text_hash+text_to_process[c].ord)
       end
 
       text_hash_string << text_hash.to_s << " "
       
       loop=text_length-k
-      
-      for c in k...loop do
-        text_hash=(radix*(text_hash-(text_to_process[k+1].ord)*highorder)+(text_hash[k+text_length].ord))
+            
+      for c in 0..loop do        
+        puts text_hash
+        text_hash=(radix*(text_hash-text_to_process[c].ord*highorder)+(text_hash[c+k].ord))%q
         text_hash_string<< text_hash_string << " "
-      end      
+      end
     end
-    
+  
   end
 end
