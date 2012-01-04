@@ -296,16 +296,19 @@ module Myth
               
         line_array=@text_to_process.split("\n")           
                
-        for line in line_array do           
-          
-          #Remove \r and \n
-          line.chomp!
+        for line in line_array do                    
           
           #Remove all tabs and whitespaces        
           line.gsub!("\t","") 
           line.gsub!(" ","")         
 
-          @filtered_text << line   
+          #Hasher needs a line number to associate with all hashes so we should not be Removing \r and \n
+          #But we can remove \r and \n if the line is empty(no text)
+          if line==''          
+            next #do not include the blankline+'\n' in filtered text
+          end
+
+          @filtered_text << line << "\n"  
         end
       end
       
