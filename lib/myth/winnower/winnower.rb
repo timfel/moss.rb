@@ -12,6 +12,9 @@ module Myth
       
       def initialize(configinstance,text_to_process) 
         
+        #calling the modules initialize method
+        super
+        
         return unless configinstance.instance_of? Myth::Winnowing::WinnowerConfset
 
         #Extracting values out of configinstance
@@ -27,10 +30,10 @@ module Myth
 
       public
 
-      def robust_winnow        
+      def get_fingerprint        
         #Get the hash list for the text
         @hash_store=calc_hash(@text_to_process,@k_gram,@prime)
-                        
+        
         #Group the Hashes into window of size '@window_size'
         #In each window select the minimum hash value. If possible break ties by selecting the same hash as the window one position left
         #If not select the rightmost minimal hash
@@ -51,18 +54,18 @@ module Myth
               processed_element+=1            
             end
             #find the minimum element in the window with its index
-            minimum_hash=window[0][:value]
+            minimum_hash=window[0]
             window.each_index do |index|              
-              if window[index][:value]<=minimum_hash then
-                minimum_hash=window[index][:value]
+              if window[index][:value]<=minimum_hash[:value] then
+                minimum_hash=window[index]
                 hash_relative_index=index
               end              
             end
             @finger_print.push(minimum_hash)
           else
             #check if the new element added to the window is lesser or equal         
-            if @hash_store[processed_element][:value]<=minimum_hash
-              minimum_hash=@hash_store[processed_element][:value]
+            if @hash_store[processed_element][:value]<=minimum_hash[:value]
+              minimum_hash=@hash_store[processed_element]
               @finger_print.push(minimum_hash)
               hash_relative_index=@window_size-1  # the relative position is now @window_size-1 in the window array
             end
