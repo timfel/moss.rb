@@ -20,7 +20,7 @@ class TestPlagiarism
     winnower_confile=File.open('../conf/winnower.conf')
 
     text_one=File.read('testcode/one.java')
-    text_two=File.read('testcode/two.java')
+    text_two=File.read('testcode/two.java')  
 
     #Initialize configuration set for NoiseConfig
     lang_ins=Myth::Filter::FilterConfset.new(lang_confile)
@@ -28,8 +28,12 @@ class TestPlagiarism
     #Initialize ther filter
     filtered_text_one=Myth::Filter::NoiseFilter.new(text_one,lang_ins).get_filtered_text
     filtered_text_two=Myth::Filter::NoiseFilter.new(text_two,lang_ins).get_filtered_text
+
+    File.open('testcode/filtered','w') do |f|
+      f.print filtered_text_one
+    end
     
-    File.open('testcode/filtered','w') do |f|      
+    File.open('testcode/filtered2','w') do |f|      
       f.print filtered_text_two
     end
 
@@ -40,9 +44,7 @@ class TestPlagiarism
     winnower_ins=Myth::Winnowing::RobustWinnower.new(winnower_confile_ins,filtered_text_one)
     winnower_ins2=Myth::Winnowing::RobustWinnower.new(winnower_confile_ins,filtered_text_two)
 
-    puts 'Winnowing text1'
     hash_list=winnower_ins.get_fingerprint
-    puts 'Winnowing text2'
     hash_list2=winnower_ins2.get_fingerprint
 
     puts 'List1'

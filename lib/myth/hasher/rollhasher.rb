@@ -16,7 +16,7 @@ module Myth
     Struct.new('Index',:index_range,:line_number)    
     
     @@span_store=Array.new    
-
+    
     def find_line(index)
       begin_index=0      
       end_index=@@span_store.length-1    
@@ -58,29 +58,36 @@ module Myth
       #Get an arrray from text with individual lines
       line_list=text_to_process.split("\n")
       index=0
-      line_count=1
+      line_count=1   
       
       for line in line_list do
 
+        #this was a blank line and is only usefull for the purpose of maintaining line number count, the text '$' has otherwise no oder significance.
+        if line=='$'
+          line_count+=1
+          next
+        end
+          
         #calc length of line 
-        line_length=line.length
+        line_length=line.length         
         
         #index...index+line.length is 
         if index==0
           index_range=index..index+line.length-1
         else
           index_range=index...index+line.length
-        end                
+        end         
         
         #Store in our DS        
         @@span_store.push(Struct::Index.new(index_range,line_count))       
         index=index+line_length
         line_count+=1
       end            
-
+      
       #We dont need newlines anymore :)
       #A clean Rabin karp algorithm can now be implemented, perhaps this makes this implementation 'neat' and worth sticking onto unlike the previous one in VC.      
       text_to_process.gsub!("\n","")
+      text_to_process.gsub!("$","")
       text_length=text_to_process.length
 
       text_hash=0

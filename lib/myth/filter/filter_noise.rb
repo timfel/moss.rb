@@ -303,11 +303,13 @@ module Myth
           line.gsub!(" ","")         
 
           #Hasher needs a line number to associate with all hashes so we should not be Removing \r and \n
-          #But we can remove \r and \n if the line is empty(no text)
+          #Also we cannot remove \r and \n if the line is empty,because the line numbers will get reduced by 1
+          #But having just a "\n" and nothing else will invite bugs when we split files on the basis of newlines
+          #Just put in a $ if the line has gone blank
           if line==''          
-            next #do not include the blankline+'\n' in filtered text
+            line='$'
           end
-
+          
           @filtered_text << line << "\n"  
         end
       end
