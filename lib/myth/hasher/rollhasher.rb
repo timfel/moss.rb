@@ -2,6 +2,7 @@
 #Designing a rolling hash function
 #Inspired by Rabin-Karp Algorithm
 
+
 module Myth
   module RollHasher
     
@@ -45,7 +46,7 @@ module Myth
       
       @@span_store.clear
       
-      radix=34
+      radix=256 #18446744073709551616
       line_number=1
 
       highorder=(radix**(k-1))%q     
@@ -112,7 +113,7 @@ module Myth
          
       #The main loop for Rabin Karp
       for c in 0...loop do   
-        text_hash=(radix*(text_hash-text_to_process[c].ord*highorder)+(text_hash[c+k].ord))%q
+        text_hash=(radix*(text_hash-(text_to_process[c].ord)*highorder)+(text_to_process[c+k].ord))%q    
         begin_line=find_line(c+1)
         end_line=find_line(c+k)
 

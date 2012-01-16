@@ -107,14 +107,14 @@ module Myth
         #We assume the line is not part of multi line comments (hence false)
         #The initialization cannot be inside loop, as multiline comments can span among multiple lines 
         
-        multi_line_type=false
+        multi_line_type=false       
 
         for line in line_array do
           
           #Check if we already a part of multiline comment
           unless multi_line_type==false
             
-            #look for end of multiline comment
+            #look for a multiline comment
             if line.include?(@confinstance.multi_line[multi_line_type][0])
               multi_line_type=false  #the multi line span end here itself
               next #goto next line
@@ -153,9 +153,12 @@ module Myth
             
             multi_comment_length=comment.length
  
+            #Remove the leading whitespaces if any...
+            line.lstrip!
+            
             #match the first 'comment.length' characters in line with comment
             prefix=line.slice(0,multi_comment_length)
-           
+            
             #the line is beginning a multiline comment
             if prefix==comment
               multi_line_type=prefix

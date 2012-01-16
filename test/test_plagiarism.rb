@@ -37,7 +37,7 @@ class TestPlagiarism
       f.print filtered_text_two
     end
 
-    #Initialize configuration for Winnower
+
     winnower_confile_ins=Myth::Winnowing::WinnowerConfset.new(winnower_confile)
 
     #Initialize the winnower
@@ -50,8 +50,9 @@ class TestPlagiarism
     puts 'List1'
     hash_list.each { |h| print h[:value], " " } 
     print "\n"
+    print "\n"
     puts 'List2'
-    hash_list2.each { |h| print h[:value], " " }
+    hash_list2.each { |h| print h[:value] , " " }
     print "\n"
 
     #A hashtable for detecting common elements between two Hash List
@@ -61,7 +62,7 @@ class TestPlagiarism
     common=Hash.new
 
     hash_list.each do |h|
-      common[h[:value]]=h[:line_span] 
+      common[h[:value]]=h[:line_span]
     end
 
     #Match the fingerprints
