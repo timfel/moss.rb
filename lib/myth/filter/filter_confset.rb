@@ -40,7 +40,7 @@ module Myth
           #Remove trailing newlines
           line.chomp!
 
-          #Check if Essay or Code type else popultate other fileds needed for code type
+          #Check if Essay type, if yes then we dont need to go through all the pain of parsing all the parameters
           break if line=="Essay:"                     
 
           #Skip the line which says 'Keywords:'
