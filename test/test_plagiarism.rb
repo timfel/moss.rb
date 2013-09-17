@@ -3,24 +3,19 @@
 #Input --> Two similar Java file
 #Output --> Line Pairs which are Plagiarised form each other
 
-require '../lib/myth/filter/filter_confset.rb'
-require '../lib/myth/filter/filter_noise.rb'
-
-require '../lib/myth/hasher/rollhasher.rb'
-require '../lib/myth/winnower/winnower_confset.rb'
-require '../lib/myth/winnower/winnower.rb'
+require_relative '../lib/myth.rb'
 
 
 class TestPlagiarism
 
-  def initialize        
+  def initialize
 
     #language noise confile
-    lang_confile=File.open('../conf/java.conf')
-    winnower_confile=File.open('../conf/winnower.conf')
+    lang_confile=File.open(File.expand_path('../../conf/java.conf', __FILE__))
+    winnower_confile=File.open(File.expand_path('../../conf/winnower.conf', __FILE__))
 
-    text_one=File.read('testcode/one.java')
-    text_two=File.read('testcode/two.java')  
+    text_one=File.read(File.expand_path('../testcode/one.java', __FILE__))
+    text_two=File.read(File.expand_path('../testcode/two.java', __FILE__))
 
     #Initialize configuration set for NoiseConfig
     lang_ins=Myth::Filter::FilterConfset.new(lang_confile)
@@ -29,11 +24,11 @@ class TestPlagiarism
     filtered_text_one=Myth::Filter::NoiseFilter.new(text_one,lang_ins).get_filtered_text
     filtered_text_two=Myth::Filter::NoiseFilter.new(text_two,lang_ins).get_filtered_text
 
-    File.open('testcode/filtered','w') do |f|
+    File.open(File.expand_path('../testcode/filtered', __FILE__),'w') do |f|
       f.print filtered_text_one
     end
-    
-    File.open('testcode/filtered2','w') do |f|      
+
+    File.open(File.expand_path('../testcode/filtered2', __FILE__),'w') do |f|
       f.print filtered_text_two
     end
 
@@ -48,7 +43,7 @@ class TestPlagiarism
     hash_list2=winnower_ins2.get_fingerprint
 
     puts 'List1'
-    hash_list.each { |h| print h[:value], " " } 
+    hash_list.each { |h| print h[:value], " " }
     print "\n"
     print "\n"
     puts 'List2'
@@ -67,12 +62,12 @@ class TestPlagiarism
 
     #Match the fingerprints
 
-    hash_list2.each do |h|      
+    hash_list2.each do |h|
       if common.include?(h[:value]) then
         print '(', h[:value] , ')' , common[h[:value]] , " " , h[:line_span] , "\n"
-      end      
+      end
     end
-   
+
   end
 
 end

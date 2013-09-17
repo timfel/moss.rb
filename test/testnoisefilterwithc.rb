@@ -4,8 +4,7 @@
 #Unit Tests FTW!
 
 require 'test/unit'
-require '../lib/myth/filter/filter_noise.rb'
-require '../lib/myth/filter/filter_confset.rb'
+require '../lib/myth/filter.rb'
 
 class TestNoiseFilter < Test::Unit::TestCase
 
@@ -19,13 +18,10 @@ class TestNoiseFilter < Test::Unit::TestCase
 
     instance=Myth::Filter::NoiseFilter.new(text_contents,confinstance)
     ans=instance.get_filtered_text
-    
+
     #Write the text after filtering
-    File.open('Cdump.txt','w') { |fp| fp.puts(ans) }    
+    File.open('Cdump.txt','w') { |fp| fp.puts(ans) }
 
   end
 
 end
-
-
-  
