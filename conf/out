@@ -1,0 +1,413 @@
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+string mem[32];
+
+float usedframes;
+float totalusedframes = 0;
+float check;
+
+struct freeframe{
+    string pgrmname;
+    float pgrmsize;
+    float pgrmfrag;
+    int position;
+    freeframe* next;
+};
+
+struct usedframe{
+    string pgrmname;
+    float pgrmsize;
+    float pgrmfrag;
+    int position;
+    usedframe* next;
+};
+
+bool isFreeEmpty(freeframe* head){
+    if(head == NULL){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool isUsedEmpty(usedframe* head){
+    if(head == NULL){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+char menu()
+{
+    char choice;
+    cout << "\nEnter a choice - ";
+    cin >> choice;
+    return choice;
+    
+    
+}
+
+void insertFirstFree(freeframe *&head, freeframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    freeframe *temp = new freeframe;
+    temp -> pgrmname = pgrmname;
+    temp -> pgrmsize = pgrmsize;
+    temp -> pgrmfrag = pgrmfrag;
+    temp -> position = 0;
+    temp -> next = NULL;
+    head = temp;
+    last = temp;
+    
+}
+void insertFree(freeframe *&head, freeframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    if(isFreeEmpty(head))
+        insertFirstFree(head, last, pgrmname, pgrmsize, pgrmfrag, position);
+    else
+    {
+        freeframe *temp =new freeframe;
+        temp -> pgrmname = pgrmname;
+        temp -> pgrmsize = pgrmsize;
+        temp -> pgrmfrag = pgrmfrag;
+        temp -> position = position;
+        temp -> next = NULL;
+        last -> next = temp;
+        last = temp;
+    }
+}
+
+
+void removeHeadFree(freeframe *&head, freeframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    if(isFreeEmpty(head))
+        cout<<"List is empty."<<endl;
+    else if (head == last)
+    {
+        delete head;
+        head = NULL;
+        last = NULL;
+        
+    }
+    else
+    {
+        freeframe *temp = head;
+        head = head -> next;
+        delete temp;
+        
+        
+    }
+    
+}
+
+void showFreeNode(freeframe *current)
+{
+    if (isFreeEmpty(current))
+        cout<<"list is empty"<<endl;
+    
+    else
+    {
+        cout<<"Nodes in list:"<<endl;
+        while(current != NULL)
+        {
+            
+            cout << current->pgrmname << " at position " << current -> position << "\t";
+            current = current->next ;
+            
+        }
+        
+    }
+    
+}
+
+void insertFirstUsed(usedframe *&head, usedframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    usedframe *temp = new usedframe;
+    temp -> pgrmname = pgrmname;
+    temp -> pgrmsize = pgrmsize;
+    temp -> pgrmfrag = pgrmfrag;
+    temp -> position = 0;
+    temp -> next = NULL;
+    head = temp;
+    last = temp;
+    
+}
+void insertUsed(usedframe *&head, usedframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    if(isUsedEmpty(head))
+        insertFirstUsed(head, last, pgrmname, pgrmsize, pgrmfrag, position);
+    else
+    {
+        usedframe *temp = new usedframe;
+        temp -> pgrmname = pgrmname;
+        temp -> pgrmsize = pgrmsize;
+        temp -> pgrmfrag = pgrmfrag;
+        temp -> position = position;
+        temp -> next = NULL;
+        last -> next = temp;
+        last = temp;
+    }
+}
+
+
+void removeHeadUsed(usedframe *&head, usedframe *&last, string pgrmname, float pgrmsize, float pgrmfrag, int position)
+{
+    if(isUsedEmpty(head))
+        cout<<"List is empty."<<endl;
+    else if (head == last)
+    {
+        delete head;
+        head = NULL;
+        last = NULL;
+        
+    }
+    else
+    {
+        usedframe *temp = head;
+        head = head -> next;
+        delete temp;
+        
+        
+    }
+    
+}
+
+void showUsedNode(usedframe *current)
+{
+    if (isUsedEmpty(current))
+        cout<<"list is empty"<<endl;
+    
+    else
+    {
+        cout<<"Nodes in list:"<<endl;
+        while(current != NULL)
+        {
+            
+            cout << current->pgrmname << " at position " << current -> position << "\t";
+            current = current->next;
+            
+        }
+        
+    }
+    
+}
+
+void removeAnyUsed(freeframe *head, freeframe *last, usedframe *uhead, usedframe *ulast, string pgrmname){
+    float usedframes;
+    bool status = false;
+   
+    usedframe *prev = new usedframe;
+    
+    if(isUsedEmpty(uhead)){
+        cout << "Program " << uhead -> pgrmname << " is not in memory." << endl;
+    }else{
+        while(uhead != NULL){
+            if(uhead -> pgrmname == pgrmname){
+                
+                usedframe *temp = new usedframe();
+                prev -> next = uhead -> next;
+                temp = uhead;
+                insertFree(head, last, "Free", 0, 0, uhead->position);
+                mem[uhead -> position] = "Free";
+                usedframes = ceil(uhead -> pgrmsize / 4);
+                status = true;
+                totalusedframes = totalusedframes - 1;
+                //cout << temp -> pgrmname << endl;
+                //cout << "in condition" << endl;
+                uhead = uhead -> next;
+                delete temp;
+                //uhead = uhead -> next;
+            }else if(uhead -> pgrmname != pgrmname){
+                //cout << "program " << pgrmname << " is not in memory." << endl;
+
+                prev = uhead;
+                uhead = uhead -> next;
+                //status = false;
+                //break;
+            }
+            
+        }
+        if(status == true){
+            cout << "Program " << pgrmname << " successfully killed, "<< usedframes << " frame(s) reclaimed." << endl;
+            cout << "Total used frame: " << totalusedframes << endl;
+        }else if(status == false){
+            cout << "Program " << pgrmname << " is not in memory." << endl;
+        }
+    }
+}
+
+
+void getFragmentation(usedframe *frame){
+    int totalfrag = 0;
+    if(isUsedEmpty(frame)){
+        totalfrag = 0;
+    }else{
+        while(frame != NULL){
+            totalfrag = totalfrag + frame -> pgrmfrag;
+            frame = frame -> next;
+        }
+    }
+    //cout << "Total fragmentation = " << totalfrag << " KB." << endl;
+}
+
+void printMemory(freeframe * ff, usedframe *uf){
+
+    int i = 0;
+    
+    while(ff != NULL && i < 32){
+        if(ff != NULL && uf == NULL){
+            mem[i] = ff -> pgrmname;
+            ff = ff -> next;
+            i++;
+        }else if(ff != NULL && uf != NULL){
+            if(ff->position == i){
+                mem[i] = ff -> pgrmname;
+                ff = ff -> next;
+            }else if(uf -> position == i){
+                mem[i] = uf -> pgrmname;
+                uf = uf -> next;
+            }
+            i++;
+        }else if(ff == NULL && uf != NULL){
+            mem[i] = uf -> pgrmname;
+            uf = uf -> next;
+            i++;
+        }
+        
+    }
+    cout << mem[0] << "\t" << mem[1] << "\t" << mem[2] << "\t" << mem[3] << "\t" << mem[4] << "\t" << mem[5] << "\t" << mem[6] << "\t" << mem[7] << endl;
+    cout << mem[8] << "\t" << mem[9] << "\t" << mem[10] << "\t" << mem[11] << "\t" << mem[12] << "\t" << mem[13] << "\t" << mem[14] << "\t" << mem[15] << endl;
+    cout << mem[16] << "\t" << mem[17] << "\t" << mem[18] << "\t" << mem[19] << "\t" << mem[20] << "\t" << mem[21] << "\t" << mem[22] << "\t" << mem[23] << endl;
+    cout << mem[24] << "\t" << mem[25] << "\t" << mem[26] << "\t" << mem[27] << "\t" << mem[28] << "\t" << mem[29] << "\t" << mem[30] << "\t" << mem[31] << endl;
+    //cout << "Total used frames : " << totalusedframes << endl;
+    
+}
+
+bool checkAddProgram(usedframe *uhead, string pgrmname){
+    bool status = false;
+    if(isUsedEmpty(uhead)){
+        status = true;
+    }else{
+        while(uhead != NULL){
+            if(uhead -> pgrmname == pgrmname){
+                status = false;
+                break;
+            }else if(uhead -> pgrmname != pgrmname){
+                status = true;
+                uhead = uhead -> next;
+            }
+        }
+    }
+    
+    return status;
+}
+
+int main() {
+    
+    string pgrmname;
+    float pgrmsize;
+    float pgrmfrag;
+    int position = 0;
+    bool namecheck;
+    
+    
+    freeframe *head = NULL;
+    freeframe *last = NULL;
+    
+    usedframe *uhead = NULL;
+    usedframe *ulast = NULL;
+    
+    int i;
+    for(i = 0 ; i < 32 ; i ++){
+        insertFree(head, last, "Free", 0, 0, i);
+    }
+    
+    char choice;
+    
+    cout << "Welcome to memory management simulation\n";
+    cout << "\t1.Run a program" << endl;
+    cout << "\t2.Terminate a program" << endl;
+    cout << "\t3.Get fragmentation" << endl;
+    cout << "\t4.Print Memory" << endl;
+    cout << "\t5.Exit" << endl;
+    do{
+        choice = menu();
+        
+        switch(choice)
+        {
+            case '1': cout << "Program name - ";
+                cin >> pgrmname;
+                
+                namecheck = checkAddProgram(uhead, pgrmname);
+                
+                if(namecheck == true){
+                    cout << "Program size (KB) - ";
+                    cin >> pgrmsize;
+                    
+                    usedframes = ceil(pgrmsize / 4);
+                    pgrmfrag = (usedframes * 4) - pgrmsize;
+                    
+                    int i, u;
+                    u = pgrmsize;
+                    i = 0;
+                    check = (totalusedframes + usedframes);
+                    
+                    if(check <= 32){
+                        cout << "Program " << pgrmname << " added successfully: " << usedframes << " frame(s) used." << endl;
+                        for (i=0; i<usedframes; i++) {
+                            u = u - 4;
+                            if(u < 0 ){
+                            
+                                insertUsed(uhead, ulast, pgrmname, pgrmsize, u * -1,head -> position);
+                                removeHeadFree(head, last, pgrmname, pgrmsize, pgrmfrag, position);
+                                totalusedframes = totalusedframes + 1;
+                                mem[head -> position] = pgrmname;
+                                //position = position + 1;
+                                
+                            }else if (u > -1){
+                                insertUsed(uhead, ulast, pgrmname, pgrmsize, 0,head -> position);
+                                removeHeadFree(head, last, pgrmname, pgrmsize, pgrmfrag, position);
+                                totalusedframes = totalusedframes + 1;
+                                mem[head -> position] = pgrmname;
+                                //position = position + 1;
+                            }
+                            
+                        }
+                        
+                    }else if(check > 32){
+                        cout << "Error: Not enough memory for Program " << pgrmname << endl;
+                        
+                    }
+                }else if(namecheck == false){
+                    cout << "Error: Program " << pgrmname << " is already running" << endl;
+                }
+                
+                
+                
+                break;
+            case '2': cout << "Program name - ";
+                cin >> pgrmname;
+                removeAnyUsed(head, last, uhead, ulast, pgrmname);
+                break;
+                
+            case '3': getFragmentation(uhead);
+                break;
+                
+            case '4': printMemory(head, uhead);
+                break;
+                
+            case '7': showFreeNode(head); // check Free frame list
+                break;
+                
+            case '8': showUsedNode(uhead); // check Used frame list
+                break;
+                
+            default: cout << "Goodbye MM" << endl;
+
+        }
+    }while(choice != '5');
+    return 0;
+}

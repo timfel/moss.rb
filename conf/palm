@@ -1,0 +1,348 @@
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+string memory[32];
+
+int frameusing;
+int totaluf = 0;
+int check;
+
+struct ffl{
+    string pname;
+    int psize;
+    int pfrag;
+    int position;
+    ffl* next;
+};
+
+struct ufl{
+    string pname;
+    int psize;
+    int pfrag;
+    int position;
+    ufl* next;
+};
+
+
+
+char choiceinput();
+bool checkffl(ffl* ffl);
+bool checkufl(ufl* ufl);
+bool checkAddProgram(ufl *uh, string pname);
+void addufl(ufl *&uh, ufl *&ul, string pname, int psize, int pfrag, int position);
+void delheadfree(ffl *&fh, ffl *&fl, string pname, int psize, int pfrag, int position);
+void delheadused(ufl *&uh, ufl *&ul, string pname, int psize, int pfrag, int position);
+void deleteused(ffl *fh, ffl *fl, ufl *uh, ufl *ul, string pname);
+void getfrag(ufl *uh);
+void printmemory(ffl * ff, ufl *uf);
+
+void addffl(ffl *&fh, ffl *&fl, string pname, int psize, int pfrag, int position)
+{
+    ffl *temp = new ffl;
+    if(checkffl(fh)){
+        temp -> pname = pname;
+        temp -> psize = psize;
+        temp -> pfrag = pfrag;
+        temp -> position = 0;
+        temp -> next = NULL;
+        fh = temp;
+        fl = temp;
+    }else{
+        temp -> pname = pname;
+        temp -> psize = psize;
+        temp -> pfrag = pfrag;
+        temp -> position = position;
+        temp -> next = NULL;
+        fl -> next = temp;
+        fl = temp;
+    }
+}
+
+int main() {
+    ffl *fh = NULL;
+    ffl *fl = NULL;
+    ufl *uh = NULL;
+    ufl *ul = NULL;
+    
+    string pname;
+    int psize;
+    int pfrag;
+    int position = 0;
+    bool checkname;
+    
+    int i;
+    for(i = 0 ; i < 32 ; i ++){
+        addffl(fh, fl, "Free", 0, 0, i);
+    }
+    
+    char choice;
+    
+    cout << "Welcome to memory management simulation\n";
+    cout << "\t1.Run a program" << endl;
+    cout << "\t2.Terminate a program" << endl;
+    cout << "\t3.Get fragmentation" << endl;
+    cout << "\t4.Print Memory" << endl;
+    cout << "\t5.Exit" << endl;
+    do{
+        choice = choiceinput();
+        
+        switch(choice)
+        {
+            case '1': cout << "Program name - ";
+                cin >> pname;
+                
+                checkname = checkAddProgram(uh, pname);
+                
+                if(checkname == true){
+                    cout << "Program size (KB) - ";
+                    cin >> psize;
+                    
+                    frameusing = ceil(psize / 4);
+                    pfrag = (frameusing * 4) - psize;
+                    
+                    int i, sizetemp;
+                    sizetemp = psize;
+                    
+                    i = 0;
+                    check = (frameusing + totaluf);
+                    
+                    if(check <= 32){
+                        cout << "Program " << pname << " added successfully: " << frameusing << " frame(s) used." << endl;
+                        for (i = 0; i < frameusing ; i++) {
+                            sizetemp = sizetemp - 4;
+                            if(sizetemp < 0 ){
+                                addufl(uh, ul, pname, psize, sizetemp * -1,uh -> position);
+                                delheadfree(fh, fl, pname, psize, pfrag, position);
+                                totaluf = totaluf + 1;
+                                memory[uh -> position] = pname;
+                            }else if (sizetemp > -1){
+                                addufl(uh, ul, pname, psize, 0,fh -> position);
+                                delheadfree(fh, fl, pname, psize, pfrag, position);
+                                totaluf = totaluf + 1;
+                                memory[uh -> position] = pname;
+                            }
+                        }
+                        
+                    }else if(check > 32){
+                        cout << "Error: Not enough memory for Program " << pname << endl;
+                        
+                    }
+                }else if(checkname == false){
+                    cout << "Error: Program " << pname << " is already running" << endl;
+                }
+                
+                
+                
+                break;
+            case '2': cout << "Program name - ";
+                cin >> pname;
+                deleteused(fh, fl, uh, ul, pname);
+                break;
+            case '3': getfrag(uh);
+                break;
+            case '4': printmemory(fh, uh);
+                break;
+                
+            default: cout << "Goodbye MM" << endl;
+                exit(0);
+                
+        }
+    }while(choice != '5');
+    return 0;
+}
+
+char choiceinput()
+{
+    char choice;
+    cout << "\nEnter a choice - ";
+    cin >> choice;
+    return choice;
+}
+
+bool checkffl(ffl* ffl){
+    if(ffl == NULL){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool checkufl(ufl* ufl){
+    if(ufl == NULL){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+
+
+bool checkAddProgram(ufl *uh, string pname){
+    bool status = false;
+    if(checkufl(uh)){
+        status = true;
+    }else{
+        while(uh != NULL){
+            if(uh -> pname == pname){
+                status = false;
+                break;
+            }else if(uh -> pname != pname){
+                status = true;
+                uh = uh -> next;
+            }
+        }
+    }
+    
+    return status;
+}
+
+void addufl(ufl *&uh, ufl *&ul, string pname, int psize, int pfrag, int position)
+{
+    ufl *temp = new ufl;
+    if(checkufl(uh)){
+        temp -> pname = pname;
+        temp -> psize = psize;
+        temp -> pfrag = pfrag;
+        temp -> position = 0;
+        temp -> next = NULL;
+        uh = temp;
+        ul = temp;
+    }else{
+        temp -> pname = pname;
+        temp -> psize = psize;
+        temp -> pfrag = pfrag;
+        temp -> position = position;
+        temp -> next = NULL;
+        ul -> next = temp;
+        ul = temp;
+    }
+}
+
+void delheadfree(ffl *&fh, ffl *&fl, string pname, int psize, int pfrag, int position)
+{
+    if(checkffl(fh))
+        cout<<"No free frame"<<endl;
+    else if (fh == fl)
+    {
+        delete fh;
+        fh = NULL;
+        fl = NULL;
+    }
+    else
+    {
+        ffl *temp = fh;
+        fh = fh -> next;
+        delete temp;
+    }
+    
+}
+
+
+void delheadused(ufl *&uh, ufl *&ul, string pname, int psize, int pfrag, int position)
+{
+    if(checkufl(uh))
+        cout<<"List is empty."<<endl;
+    else if (uh == ul)
+    {
+        delete uh;
+        uh = NULL;
+        ul = NULL;
+        
+    }
+    else
+    {
+        ufl *temp = uh;
+        uh = uh -> next;
+        delete temp;
+        
+        
+    }
+    
+}
+
+
+void deleteused(ffl *fh, ffl *fl, ufl *uh, ufl *ul, string pname){
+    int usedframes;
+    bool status = false;
+    
+    ufl *prev = new ufl;
+    
+    if(checkufl(uh)){
+        cout << "Program " << uh -> pname << " is not in memory." << endl;
+    }else{
+        while(uh != NULL){
+            if(uh -> pname == pname){
+                ufl *temp = new ufl;
+                prev -> next = uh -> next;
+                temp = uh;
+                addffl(fh, fl, "Free", 0, 0, uh->position);
+                memory[uh -> position] = "Free";
+                frameusing = ceil(uh -> psize / 4);
+                status = true;
+                totaluf = totaluf - 1;
+                uh = uh -> next;
+                delete temp;
+            }else if(uh -> pname != pname){
+                prev = uh;
+                uh = uh -> next;
+            }
+            
+        }
+        if(status == true){
+            cout << "Program " << pname << " successfully killed, "<< frameusing << " frame(s) reclaimed." << endl;
+            cout << "Total used frame: " << totaluf << endl;
+        }else if(status == false){
+            cout << "Program " << pname << " is not in memory." << endl;
+        }
+    }
+}
+
+
+void getfrag(ufl *uh){
+    int totalfrag = 0;
+    if(checkufl(uh)){
+        totalfrag = 0;
+    }else{
+        while(uh != NULL){
+            totalfrag = totalfrag + uh-> pfrag;
+            uh = uh -> next;
+        }
+    }
+    cout << "Total fragmentation = " << totalfrag << " KB." << endl;
+}
+
+void printmemory(ffl * ff, ufl *uf){
+    
+    int i = 0;
+    
+    while(ff != NULL && i < 32){
+        if(ff != NULL && uf == NULL){
+            memory[i] = ff -> pname;
+            ff = ff -> next;
+            i++;
+        }else if(ff != NULL && uf != NULL){
+            if(ff->position == i){
+                memory[i] = ff -> pname;
+                ff = ff -> next;
+            }else if(uf -> position == i){
+                memory[i] = uf -> pname;
+                uf = uf -> next;
+            }
+            i++;
+        }else if(ff == NULL && uf != NULL){
+            memory[i] = uf -> pname;
+            uf = uf -> next;
+            i++;
+        }
+        
+    }
+    
+    cout << memory[0] << "\t" << memory[1] << "\t" << memory[2] << "\t" << memory[3] << "\t" << memory[4] << "\t" << memory[5] << "\t" << memory[6] << "\t" << memory[7] << endl;
+    cout << memory[8] << "\t" << memory[9] << "\t" << memory[10] << "\t" << memory[11] << "\t" << memory[12] << "\t" << memory[13] << "\t" << memory[14] << "\t" << memory[15] << endl;
+    cout << memory[16] << "\t" << memory[17] << "\t" << memory[18] << "\t" << memory[19] << "\t" << memory[20] << "\t" << memory[21] << "\t" << memory[22] << "\t" << memory[23] << endl;
+    cout << memory[24] << "\t" << memory[25] << "\t" << memory[26] << "\t" << memory[27] << "\t" << memory[28] << "\t" << memory[29] << "\t" << memory[30] << "\t" << memory[31] << endl;
+    
+    
+}
